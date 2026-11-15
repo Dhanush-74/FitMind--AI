@@ -223,6 +223,19 @@ function setupEventListeners() {
         });
     });
 
+    // Quick topics click
+    document.querySelectorAll('.quick-topic-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const query = btn.getAttribute('data-query');
+            if (query) {
+                elements.messageInput.value = query;
+                elements.messageInput.style.height = 'auto';
+                elements.messageInput.style.height = (elements.messageInput.scrollHeight) + 'px';
+                handleSendMessage();
+            }
+        });
+    });
+
     // Attachment dropdown
     elements.attachBtn?.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -501,6 +514,9 @@ function appendMessage(role, content) {
                 </div>
                 <div class="message-content">${parsedHtml}</div>
                 <div class="message-actions">
+                    <button class="msg-btn speak-btn" title="Listen to response">
+                        <i class="fa-solid fa-volume-high"></i> Listen
+                    </button>
                     <button class="msg-btn copy-btn" title="Copy response">
                         <i class="fa-regular fa-copy"></i> Copy
                     </button>
@@ -510,6 +526,36 @@ function appendMessage(role, content) {
                 </div>
             </div>
         `;
+
+        // Speak / Audio Read-Aloud
+        const speakBtn = wrapper.querySelector('.speak-btn');
+        speakBtn?.addEventListener('click', () => {
+            if ('speechSynthesis' in window) {
+                if (window.speechSynthesis.speaking) {
+                    window.speechSynthesis.cancel();
+                    speakBtn.classList.remove('speaking');
+                    speakBtn.innerHTML = '<i class="fa-solid fa-volume-high"></i> Listen';
+                    return;
+                }
+                const cleanText = content.replace(/[#*_`>~-]/g, '');
+                const utterance = new SpeechSynthesisUtterance(cleanText);
+                utterance.rate = 1.05;
+                utterance.pitch = 1.0;
+                utterance.onend = () => {
+                    speakBtn.classList.remove('speaking');
+                    speakBtn.innerHTML = '<i class="fa-solid fa-volume-high"></i> Listen';
+                };
+                utterance.onerror = () => {
+                    speakBtn.classList.remove('speaking');
+                    speakBtn.innerHTML = '<i class="fa-solid fa-volume-high"></i> Listen';
+                };
+                window.speechSynthesis.speak(utterance);
+                speakBtn.classList.add('speaking');
+                speakBtn.innerHTML = '<i class="fa-solid fa-stop"></i> Stop';
+            } else {
+                showToast('Speech synthesis not supported in this browser.', 'info');
+            }
+        });
 
         // Attach action listeners
         const copyBtn = wrapper.querySelector('.copy-btn');
@@ -858,6 +904,9 @@ function updateHydrationMeter() {
 
     const statHydration = document.getElementById('statHydration');
     if (statHydration) statHydration.innerHTML = `${current} <small>ml</small>`;
+
+    const sidebarWater = document.getElementById('sidebarWaterStat');
+    if (sidebarWater) sidebarWater.textContent = (current / 1000).toFixed(2) + ' L';
 
     if (elements.hydrationCircle) {
         elements.hydrationCircle.style.background = `conic-gradient(var(--accent-cyan) 0% ${percent}%, rgba(255, 255, 255, 0.08) ${percent}% 100%)`;

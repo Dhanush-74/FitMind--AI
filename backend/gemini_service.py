@@ -92,6 +92,23 @@ class GeminiService:
 
         except Exception as e:
             error_str = str(e).lower()
+            if "not found" in error_str or "404" in error_str:
+                try:
+                    fallback_model = "gemini-1.5-flash" if "2" in self.model else "gemini-2.0-flash"
+                    fallback_resp = self.client.models.generate_content(
+                        model=fallback_model,
+                        contents=contents,
+                        config=types.GenerateContentConfig(
+                            system_instruction=sys_instruction,
+                            temperature=temperature,
+                            max_output_tokens=8192,
+                        ),
+                    )
+                    if fallback_resp and fallback_resp.text:
+                        return fallback_resp.text.strip()
+                except Exception:
+                    pass
+
             if "quota" in error_str or "rate" in error_str or "429" in error_str:
                 return "⚠️ API rate limit reached. Please wait a moment and try again."
             elif "invalid" in error_str or "api key" in error_str or "401" in error_str or "403" in error_str:

@@ -32,8 +32,8 @@ CHUNK_OVERLAP = 200
 TOP_K_RESULTS = 5
 
 # Gemini model
-GEMINI_MODEL = "gemini-2.0-flash"
-GEMINI_VISION_MODEL = "gemini-2.0-flash"
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
+GEMINI_VISION_MODEL = os.getenv("GEMINI_VISION_MODEL", "gemini-2.0-flash")
 
 # App settings
 APP_HOST = os.getenv("HOST", "0.0.0.0")
