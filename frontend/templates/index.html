@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FitMind AI – Intelligent Health & Fitness Coach</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <!-- Marked.js (Markdown parser) -->
+    <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="app-layout">
+        <!-- SIDEBAR -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="brand">
+                    <div class="brand-icon">
+                        <i class="fa-solid fa-heart-pulse"></i>
+                    </div>
+                    <div class="brand-text">
+                        <h2>FitMind<span>AI</span></h2>
+                        <span class="badge-sub">Health & Fitness Coach</span>
+                    </div>
+                </div>
+                <button class="icon-btn close-sidebar-btn" id="closeSidebarBtn" title="Close Sidebar">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="sidebar-actions">
+                <button class="btn btn-primary btn-new-chat" id="newChatBtn">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>New Chat</span>
+                </button>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="sidebar-nav">
+                <button class="nav-item active" id="navChatBtn">
+                    <i class="fa-solid fa-comments"></i>
+                    <span>Conversations</span>
+                </button>
+                <button class="nav-item" id="navDashboardBtn">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <span>Fitness Dashboard</span>
+                    <span class="nav-badge">Live</span>
+                </button>
+            </nav>
+
+            <!-- Conversations List -->
+            <div class="sidebar-section-title">
+                <span>Recent History</span>
+            </div>
+            <div class="conversation-list" id="conversationList">
+                <div class="conv-loading">
+                    <i class="fa-solid fa-circle-notch fa-spin"></i>
+                    <span>Loading history...</span>
+                </div>
+            </div>
+
+            <!-- Sidebar Footer -->
+            <div class="sidebar-footer">
+                <button class="footer-btn text-danger" id="clearAllBtn" title="Clear all chat history">
+                    <i class="fa-solid fa-trash-can"></i>
+                    <span>Clear All History</span>
+                </button>
+                <div class="api-status-badge" id="apiStatusBadge">
+                    <span class="status-dot healthy"></span>
+                    <span id="apiStatusText">Gemini 2.0 Connected</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT AREA -->
+        <main class="main-content">
+            <!-- TOP BAR -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="icon-btn hamburger-btn" id="toggleSidebarBtn" title="Toggle Sidebar">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                    <div class="current-chat-title" id="topbarChatTitle">
+                        <i class="fa-solid fa-dumbbell"></i>
+                        <span>FitMind AI Coach</span>
+                    </div>
+                </div>
+                <div class="topbar-right">
+                    <button class="btn btn-glass" id="openDashboardTopBtn">
+                        <i class="fa-solid fa-gauge-high"></i>
+                        <span class="hide-mobile">Dashboard & Tools</span>
+                    </button>
+                    <div class="model-pill">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        <span>Multimodal AI</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- CHAT WRAPPER -->
+            <div class="chat-container" id="chatContainer">
+                <!-- WELCOME SCREEN -->
+                <div class="welcome-screen" id="welcomeScreen">
+                    <div class="welcome-hero">
+                        <div class="welcome-icon-glow">
+                            <i class="fa-solid fa-heart-pulse"></i>
+                        </div>
+                        <h1>Welcome to <span class="gradient-text">FitMind AI</span></h1>
+                        <p class="welcome-subtitle">
+                            Your intelligent personal health, nutrition, and fitness companion.
+                            Eat smarter, move better, and build sustainable wellness habits grounded in science.
+                        </p>
+                    </div>
+
+                    <div class="suggestions-grid">
+                        <div class="suggestion-card" data-prompt="Create a comprehensive beginner workout plan for a full body routine with proper rest days.">
+                            <div class="s-icon"><i class="fa-solid fa-person-walking"></i></div>
+                            <h3>Beginner Workout Plan</h3>
+                            <p>Structured full-body starter routine with reps, sets, and rest intervals.</p>
+                        </div>
+                        <div class="suggestion-card" data-prompt="Suggest 3 healthy, high-protein breakfast options with approximate calories and preparation steps.">
+                            <div class="s-icon"><i class="fa-solid fa-bowl-food"></i></div>
+                            <h3>Healthy Breakfast Ideas</h3>
+                            <p>Nutrient-dense, high-protein recipes to fuel your morning energy.</p>
+                        </div>
+                        <div class="suggestion-card" data-prompt="Explain how calories, protein, carbs, and fats work together for weight management and lean muscle gain.">
+                            <div class="s-icon"><i class="fa-solid fa-chart-pie"></i></div>
+                            <h3>Calories & Macros</h3>
+                            <p>Clear breakdown of macronutrients, energy balance, and metabolism.</p>
+                        </div>
+                        <div class="suggestion-card" data-prompt="Design a balanced weekly fitness routine that combines strength training, cardio, and active recovery.">
+                            <div class="s-icon"><i class="fa-solid fa-calendar-week"></i></div>
+                            <h3>Weekly Fitness Routine</h3>
+                            <p>Balanced 7-day schedule optimizing hypertrophy, stamina, and recovery.</p>
+                        </div>
+                        <div class="suggestion-card" data-prompt="Suggest an effective 20-minute home workout requiring no equipment, targeting full-body fitness.">
+                            <div class="s-icon"><i class="fa-solid fa-house"></i></div>
+                            <h3>No-Equipment Home Workout</h3>
+                            <p>Calisthenics and HIIT moves you can do right in your living room.</p>
+                        </div>
+                        <div class="suggestion-card" data-prompt="Help me build healthy daily habits for hydration, sleep hygiene, and daily movement.">
+                            <div class="s-icon"><i class="fa-solid fa-seedling"></i></div>
+                            <h3>Build Healthy Habits</h3>
+                            <p>Actionable, science-backed lifestyle changes that actually stick.</p>
+                        </div>
+                    </div>
+
+                    <!-- Multimodal Showcase Banner -->
+                    <div class="multimodal-features-banner">
+                        <div class="feature-pill">
+                            <i class="fa-solid fa-camera"></i>
+                            <span>Food Photo & Nutrition Label Scanner</span>
+                        </div>
+                        <div class="feature-pill">
+                            <i class="fa-solid fa-file-medical"></i>
+                            <span>RAG-Powered Fitness PDF & Document Q&A</span>
+                        </div>
+                        <div class="feature-pill">
+                            <i class="fa-solid fa-shield-halved"></i>
+                            <span>Evidence-Based Health Safety Guardrails</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MESSAGES LIST -->
+                <div class="messages-list hidden" id="messagesList"></div>
+
+                <!-- TYPING INDICATOR -->
+                <div class="typing-indicator hidden" id="typingIndicator">
+                    <div class="bot-avatar">
+                        <i class="fa-solid fa-heart-pulse"></i>
+                    </div>
+                    <div class="typing-bubble">
+                        <div class="typing-dots">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                        <span class="typing-text">FitMind is analyzing...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FILE PREVIEW STRIP -->
+            <div class="file-preview-strip hidden" id="filePreviewStrip">
+                <div class="preview-item">
+                    <div class="preview-icon" id="previewIcon">
+                        <i class="fa-solid fa-file"></i>
+                    </div>
+                    <div class="preview-details">
+                        <div class="preview-name" id="previewFileName">filename.ext</div>
+                        <div class="preview-type" id="previewFileType">Image</div>
+                    </div>
+                    <button class="preview-remove" id="previewRemoveBtn" title="Remove file">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- CHAT INPUT AREA -->
+            <div class="chat-input-wrapper">
+                <!-- Drag and drop backdrop -->
+                <div class="drag-drop-overlay" id="dragDropOverlay">
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                    <p>Drop your Food Photo, Nutrition Label, or Fitness Document here</p>
+                    <span>Supports JPG, PNG, WEBP, PDF, DOCX, TXT (up to 10MB)</span>
+                </div>
+
+                <div class="chat-input-bar">
+                    <!-- Attachment button with popover menu -->
+                    <div class="attachment-dropdown">
+                        <button class="icon-btn attachment-btn" id="attachBtn" title="Upload Food Photo or Fitness Document">
+                            <i class="fa-solid fa-paperclip"></i>
+                        </button>
+                        <div class="attachment-menu hidden" id="attachMenu">
+                            <button class="attach-option" id="optUploadImage">
+                                <i class="fa-solid fa-camera"></i>
+                                <div>
+                                    <strong>Food / Workout Image</strong>
+                                    <span>JPG, PNG, WEBP for nutrition/form scan</span>
+                                </div>
+                            </button>
+                            <button class="attach-option" id="optUploadDoc">
+                                <i class="fa-solid fa-file-pdf"></i>
+                                <div>
+                                    <strong>Health/Fitness Document</strong>
+                                    <span>PDF, DOCX, TXT for RAG extraction</span>
+                                </div>
+                            </button>
+                        </div>
+                        <!-- Hidden file inputs -->
+                        <input type="file" id="imageFileInput" accept="image/jpeg,image/png,image/webp" style="display:none;">
+                        <input type="file" id="docFileInput" accept=".pdf,.docx,.txt" style="display:none;">
+                    </div>
+
+                    <!-- Message text input -->
+                    <div class="textarea-container">
+                        <textarea
+                            id="messageInput"
+                            rows="1"
+                            placeholder="Ask FitMind about workouts, nutrition, meals, fitness documents..."
+                            autocomplete="off"
+                        ></textarea>
+                    </div>
+
+                    <!-- Send button -->
+                    <button class="btn-send" id="sendBtn" title="Send message">
+                        <i class="fa-solid fa-arrow-up"></i>
+                    </button>
+                </div>
+
+                <div class="input-disclaimer">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <span>FitMind AI provides educational fitness & nutrition guidance. Always consult a healthcare professional for medical questions.</span>
+                </div>
+            </div>
+        </main>
+
+        <!-- DASHBOARD SLIDE-OVER PANEL -->
+        <div class="dashboard-panel" id="dashboardPanel">
+            <div class="dashboard-header">
+                <div class="dashboard-title">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <h3>Fitness & Wellness Hub</h3>
+                </div>
+                <button class="icon-btn" id="closeDashboardBtn" title="Close Dashboard">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Dashboard Navigation Tabs -->
+            <div class="dashboard-tabs">
+                <button class="dash-tab active" data-tab="overview">
+                    <i class="fa-solid fa-gauge"></i> Overview
+                </button>
+                <button class="dash-tab" data-tab="nutrition">
+                    <i class="fa-solid fa-utensils"></i> Nutrition
+                </button>
+                <button class="dash-tab" data-tab="bmi">
+                    <i class="fa-solid fa-weight-scale"></i> BMI Calculator
+                </button>
+                <button class="dash-tab" data-tab="planner">
+                    <i class="fa-solid fa-calendar-check"></i> Workout Plan
+                </button>
+                <button class="dash-tab" data-tab="hydration">
+                    <i class="fa-solid fa-droplet"></i> Hydration
+                </button>
+                <button class="dash-tab" data-tab="habits">
+                    <i class="fa-solid fa-list-check"></i> Habits
+                </button>
+                <button class="dash-tab" data-tab="progress">
+                    <i class="fa-solid fa-arrow-trend-up"></i> Progress
+                </button>
+            </div>
+
+            <div class="dashboard-body">
+                <!-- TAB 1: OVERVIEW -->
+                <div class="tab-content active" id="tab-overview">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon purple"><i class="fa-solid fa-fire"></i></div>
+                            <div class="stat-info">
+                                <span class="stat-label">Daily Calories</span>
+                                <span class="stat-value" id="statCalories">1,850 <small>kcal</small></span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon cyan"><i class="fa-solid fa-dumbbell"></i></div>
+                            <div class="stat-info">
+                                <span class="stat-label">Workouts (Week)</span>
+                                <span class="stat-value" id="statWorkouts">4 / 5</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon blue"><i class="fa-solid fa-glass-water"></i></div>
+                            <div class="stat-info">
+                                <span class="stat-label">Hydration</span>
+                                <span class="stat-value" id="statHydration">1,750 <small>ml</small></span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon green"><i class="fa-solid fa-bolt"></i></div>
+                            <div class="stat-info">
+                                <span class="stat-label">Active Streak</span>
+                                <span class="stat-value" id="statStreak">6 <small>days</small></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dash-card mt-3">
+                        <div class="card-title">
+                            <h4><i class="fa-solid fa-bullseye"></i> Current Goals & Schedule</h4>
+                        </div>
+                        <ul class="quick-goals-list">
+                            <li><i class="fa-regular fa-circle-check text-success"></i> Strength Training: 4 days / week</li>
+                            <li><i class="fa-regular fa-circle-check text-success"></i> Daily Protein Target: 130g</li>
+                            <li><i class="fa-regular fa-circle text-muted"></i> 2.5 Liters Daily Water</li>
+                            <li><i class="fa-regular fa-circle text-muted"></i> 7.5+ Hours Sleep Consistency</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- TAB 2: NUTRITION -->
+                <div class="tab-content" id="tab-nutrition">
+                    <div class="dash-card">
+                        <div class="card-title">
+                            <h4><i class="fa-solid fa-chart-pie"></i> Daily Macronutrient Breakdown</h4>
+                        </div>
+                        <div class="chart-container-donut">
+                            <canvas id="macroChart"></canvas>
+                        </div>
+                        <div class="macro-legend-grid">
+                            <div class="macro-badge protein">
+                                <span class="dot"></span>
+                                <span>Protein: <strong>140g</strong> (35%)</span>
+                            </div>
+                            <div class="macro-badge carbs">
+                                <span class="dot"></span>
+                                <span>Carbs: <strong>180g</strong> (45%)</span>
+                            </div>
+                            <div class="macro-badge fats">
+                                <span class="dot"></span>
+                                <span>Fats: <strong>45g</strong> (20%)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dash-card mt-3">
+                        <div class="card-title">
+                            <h4><i class="fa-solid fa-chart-column"></i> Weekly Caloric Intake</h4>
+                        </div>
+                        <div class="chart-container-bar">
+                            <canvas id="calorieChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 3: BMI CALCULATOR -->
+                <div class="tab-content" id="tab-bmi">
+                    <div class="dash-card">
+                        <div class="card-title">
+                            <h4><i class="fa-solid fa-calculator"></i> Adult BMI Calculator</h4>
+                        </div>
+                        <p class="card-description">
+                            Body Mass Index (BMI) is a screening measure of weight relative to height. It is an educational tool, not a diagnostic measure of body composition or fitness.
+                        </p>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="bmiHeight">Height (cm)</label>
+                                <input type="number" id="bmiHeight" placeholder="e.g. 175" min="100" max="250" value="175">
+                            </div>
+                            <div class="form-group">
+                                <label for="bmiWeight">Weight (kg)</label>
+                                <input type="number" id="bmiWeight" placeholder="e.g. 70" min="30" max="300" value="70">
+                            </div>
+                        </div>
+                        <button class="btn btn-primary w-100 mt-2" id="calcBmiBtn">
+                            <i class="fa-solid fa-calculator"></i> Calculate BMI
+                        </button>
+
+                        <!-- Result Display -->
+                        <div class="bmi-result-card mt-3" id="bmiResultBox">
+                            <div class="bmi-metric">
+                                <span class="bmi-number" id="bmiScore">22.9</span>
+                                <span class="bmi-label">kg/m²</span>
+                            </div>
+                            <div class="bmi-category normal" id="bmiCategory">Normal Weight</div>
+                            <p class="bmi-explanation" id="bmiExplanation">
+                                Your BMI falls within the healthy adult range (18.5 – 24.9). Regular movement and balanced nutrition support vitality.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 4: WORKOUT PLANNER -->
+                <div class="tab-content" id="tab-planner">
+                    <div class="dash-card">
+                        <div class="card-title space-between">
+                            <h4><i class="fa-solid fa-calendar-days"></i> Weekly Workout Schedule</h4>
+                            <span class="badge-sub">Mon – Sun</span>
+                        </div>
+                        <div class="workout-days-list" id="workoutDaysList">
+                            <!-- Populated dynamically via JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 5: HYDRATION TRACKER -->
+                <div class="tab-content" id="tab-hydration">
+                    <div class="dash-card text-center">
+                        <div class="card-title">
+                            <h4><i class="fa-solid fa-droplet text-cyan"></i> Daily Hydration Tracker</h4>
+                        </div>
+                        
+                        <div class="hydration-circle-wrapper">
+                            <div class="hydration-circle" id="hydrationCircle">
+                                <div class="hydration-inner">
+                                    <i class="fa-solid fa-glass-water"></i>
+                                    <span class="hydration-amount" id="hydroCurrent">1750</span>
+                                    <span class="hydration-target">/ <span id="hydroGoal">2500</span> ml</span>
+                                    <span class="hydration-percent" id="hydroPercent">70%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="quick-water-buttons">
+                            <button class="btn btn-water" id="addWater250">
+                                <i class="fa-solid fa-plus"></i> 250 ml (Cup)
+                            </button>
+                            <button class="btn btn-water" id="addWater500">
+                                <i class="fa-solid fa-plus"></i> 500 ml (Bottle)
+                            </button>
+                            <button class="btn btn-glass" id="resetWater">
+                                <i class="fa-solid fa-rotate-left"></i> Reset
+                            </button>
+                        </div>
+                        <p class="mt-2 text-muted" style="font-size:0.82rem;">
+                            Hydration needs vary with climate, body size, and training intensity. Listen to your body and thirst cues!
+                        </p>
+                    </div>
+                </div>
+
+                <!-- TAB 6: HABITS TRACKER -->
+                <div class="tab-content" id="tab-habits">
+                    <div class="dash-card">
+                        <div class="card-title">
+                            <h4><i class="fa-solid fa-list-check"></i> Healthy Habits Checklist</h4>
+                        </div>
+                        <p class="card-description">Track foundational wellness habits every day to build lasting health momentum.</p>
+                        
+                        <div class="habit-items-list" id="habitItemsList">
+                            <!-- Populated dynamically via JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 7: PROGRESS TRACKER -->
+                <div class="tab-content" id="tab-progress">
+                    <div class="dash-card">
+                        <div class="card-title">
+                            <h4><i class="fa-solid fa-arrow-trend-up"></i> Weight & Metric History</h4>
+                        </div>
+                        <div class="chart-container-line">
+                            <canvas id="progressChart"></canvas>
+                        </div>
+                        
+                        <div class="progress-add-form mt-3">
+                            <h5>Log Measurement</h5>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Weight (kg)</label>
+                                    <input type="number" id="progWeight" step="0.1" placeholder="70.5">
+                                </div>
+                                <div class="form-group">
+                                    <label>Notes / Feeling</label>
+                                    <input type="text" id="progNotes" placeholder="Post morning workout">
+                                </div>
+                            </div>
+                            <button class="btn btn-primary w-100 mt-2" id="addProgressBtn">
+                                <i class="fa-solid fa-plus"></i> Record Entry
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TOAST CONTAINER -->
+        <div class="toast-container" id="toastContainer"></div>
+    </div>
+
+    <!-- Custom JS -->
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
